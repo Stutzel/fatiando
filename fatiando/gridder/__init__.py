@@ -100,8 +100,8 @@ def load_surfer(fname, fmt='ascii'):
             area = (xmin, xmax, ymin, ymax)
             # Read the min/max value of grid values
             datamin, datamax = [float(s) for s in ftext.readline().split()]
-            data = np.fromiter((float(i) for line in ftext for i in
-                                   line.split()), dtype='f')
+            data = np.fromiter(
+                (float(i) for line in ftext for i in line.split()), dtype='f')
             data = np.ma.masked_greater_equal(data, 1.70141e+38)
             assert np.allclose(datamin, data.min()) \
                 and np.allclose(datamax, data.max()), \

@@ -142,7 +142,7 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
     if _is_number(padtype):
         # Pad with value
         ap = np.pad(a, nps, mode='constant',
-                       constant_values=(float(padtype), float(padtype)))
+                    constant_values=(float(padtype), float(padtype)))
     elif padtype.lower() == 'mean':
         # Pad with the mean
         ap = np.pad(a, nps, mode='mean')
@@ -154,19 +154,16 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
         ap = np.pad(a, nps, mode='edge')
     elif padtype.lower() == 'reflection':
         # Pad with even reflection
-        ap = np.pad(a, nps, mode='reflect',
-                       reflect_type='even')
+        ap = np.pad(a, nps, mode='reflect', reflect_type='even')
     elif padtype.lower() == 'oddreflection':
         # Pad with odd reflection
-        ap = np.pad(a, nps, mode='reflect',
-                       reflect_type='odd')
+        ap = np.pad(a, nps, mode='reflect', reflect_type='odd')
     elif padtype.lower() == 'oddreflectiontaper':
         # Pad with odd reflection and a cosine taper to mean
-        ap = (np.pad(a, nps, mode='reflect',
-                        reflect_type='odd') - m)
+        ap = (np.pad(a, nps, mode='reflect', reflect_type='odd') - m)
         for ii in range(0, nd):
             ap = np.apply_along_axis(_costaper, ii, ap, lp=nps[ii][0],
-                                        rp=nps[ii][1])
+                                     rp=nps[ii][1])
         ap += m
 
     return ap, nps
