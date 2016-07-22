@@ -1,39 +1,5 @@
 """
 Create and operate on grids and profiles.
-
-**Grid generation**
-
-* :func:`~fatiando.gridder.regular`
-* :func:`~fatiando.gridder.scatter`
-
-**Grid operations**
-
-* :func:`~fatiando.gridder.cut`
-* :func:`~fatiando.gridder.profile`
-
-**Interpolation**
-
-* :func:`~fatiando.gridder.interp`
-* :func:`~fatiando.gridder.interp_at`
-* :func:`~fatiando.gridder.extrapolate_nans`
-
-**Padding**
-
-* :func:`~fatiando.gridder.pad_array`
-* :func:`~fatiando.gridder.unpad_array`
-* :func:`~fatiando.gridder.pad_coords`
-
-**Input/Output**
-
-* :func:`~fatiando.gridder.load_surfer`: Read a Surfer grid file and return
-  three 1d numpy arrays and the grid shape
-
-**Misc**
-
-* :func:`~fatiando.gridder.spacing`
-
-----
-
 """
 from .slicing import inside, cut
 from .interpolation import interp, interp_at, extrapolate_nans, profile
