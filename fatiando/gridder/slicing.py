@@ -1,7 +1,5 @@
 """
 Functions for segmenting spacial data (windowing, cutting, etc).
-
->>> from __future__ import division, absolute_import, print_function
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
@@ -26,26 +24,26 @@ def inside(x, y, area):
 
     Examples:
 
-        >>> import numpy as np
-        >>> x = np.array([1, 2, 3, 4, 5, 6])
-        >>> y = np.array([10, 11, 12, 13, 14, 15])
-        >>> area = [2.5, 5.5, 12, 15]
-        >>> is_inside = inside(x, y, area)
-        >>> print(is_inside)
-        [False False  True  True  True False]
-        >>> # This also works for 2D-arrays
-        >>> x = np.array([[1, 1, 1],
-        ...               [2, 2, 2],
-        ...               [3, 3, 3]])
-        >>> y = np.array([[5, 7, 9],
-        ...               [5, 7, 9],
-        ...               [5, 7, 9]])
-        >>> area = [0.5, 2.5, 7, 9]
-        >>> is_inside = inside(x, y, area)
-        >>> print(is_inside)
-        [[False  True  True]
-         [False  True  True]
-         [False False False]]
+    >>> import numpy as np
+    >>> x = np.array([1, 2, 3, 4, 5, 6])
+    >>> y = np.array([10, 11, 12, 13, 14, 15])
+    >>> area = [2.5, 5.5, 12, 15]
+    >>> is_inside = inside(x, y, area)
+    >>> print(is_inside)
+    [False False  True  True  True False]
+    >>> # This also works for 2D-arrays
+    >>> x = np.array([[1, 1, 1],
+    ...               [2, 2, 2],
+    ...               [3, 3, 3]])
+    >>> y = np.array([[5, 7, 9],
+    ...               [5, 7, 9],
+    ...               [5, 7, 9]])
+    >>> area = [0.5, 2.5, 7, 9]
+    >>> is_inside = inside(x, y, area)
+    >>> print(is_inside)
+    [[False  True  True]
+     [False  True  True]
+     [False False False]]
 
     """
     x1, x2, y1, y2 = area
@@ -77,36 +75,36 @@ def cut(x, y, scalars, area):
 
     Examples:
 
-        >>> import numpy as np
-        >>> x = np.array([1, 2, 3, 4, 5, 6])
-        >>> y = np.array([10, 11, 12, 13, 14, 15])
-        >>> data = np.array([42, 65, 92, 24, 135, 456])
-        >>> area = [2.5, 5.5, 12, 15]
-        >>> xs, ys, [datas] = cut(x, y, [data], area)
-        >>> print(xs)
-        [3 4 5]
-        >>> print(ys)
-        [12 13 14]
-        >>> print(datas)
-        [ 92  24 135]
-        >>> # This also works for 2D-arrays
-        >>> x = np.array([[1, 1, 1],
-        ...               [2, 2, 2],
-        ...               [3, 3, 3]])
-        >>> y = np.array([[5, 7, 9],
-        ...               [5, 7, 9],
-        ...               [5, 7, 9]])
-        >>> data = np.array([[12, 84, 53],
-        ...                  [43, 79, 29],
-        ...                  [45, 27, 10]])
-        >>> area = [0.5, 2.5, 7, 9]
-        >>> xs, ys, [datas] = cut(x, y, [data], area)
-        >>> print(xs)
-        [1 1 2 2]
-        >>> print(ys)
-        [7 9 7 9]
-        >>> print(datas)
-        [84 53 79 29]
+    >>> import numpy as np
+    >>> x = np.array([1, 2, 3, 4, 5, 6])
+    >>> y = np.array([10, 11, 12, 13, 14, 15])
+    >>> data = np.array([42, 65, 92, 24, 135, 456])
+    >>> area = [2.5, 5.5, 12, 15]
+    >>> xs, ys, [datas] = cut(x, y, [data], area)
+    >>> print(xs)
+    [3 4 5]
+    >>> print(ys)
+    [12 13 14]
+    >>> print(datas)
+    [ 92  24 135]
+    >>> # This also works for 2D-arrays
+    >>> x = np.array([[1, 1, 1],
+    ...               [2, 2, 2],
+    ...               [3, 3, 3]])
+    >>> y = np.array([[5, 7, 9],
+    ...               [5, 7, 9],
+    ...               [5, 7, 9]])
+    >>> data = np.array([[12, 84, 53],
+    ...                  [43, 79, 29],
+    ...                  [45, 27, 10]])
+    >>> area = [0.5, 2.5, 7, 9]
+    >>> xs, ys, [datas] = cut(x, y, [data], area)
+    >>> print(xs)
+    [1 1 2 2]
+    >>> print(ys)
+    [7 9 7 9]
+    >>> print(datas)
+    [84 53 79 29]
 
     """
     is_inside = inside(x, y, area)
