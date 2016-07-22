@@ -1,10 +1,20 @@
 """
 Generate points on a map as regular grids or points scatters.
-
->>> from __future__ import division, absolute_import, print_function
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
+
+
+def _check_area(area):
+    """
+    Check that the area argument is valid.
+    For example, the west limit should not be greater than the east limit.
+    """
+    x1, x2, y1, y2 = area
+    assert x1 <= x2, \
+        "Invalid area dimensions {}, {}. x1 must be < x2.".format(x1, x2)
+    assert y1 <= y2, \
+        "Invalid area dimensions {}, {}. y1 must be < y2.".format(y1, y2)
 
 
 def regular(area, shape, z=None):
@@ -42,43 +52,40 @@ def regular(area, shape, z=None):
 
     Examples::
 
-        >>> x, y = regular((0, 10, 0, 5), (5, 3))
-        >>> x
-        array([  0. ,   0. ,   0. ,   2.5,   2.5,   2.5,   5. ,   5. ,   5. ,
-                 7.5,   7.5,   7.5,  10. ,  10. ,  10. ])
-        >>> x.reshape((5, 3))
-        array([[  0. ,   0. ,   0. ],
-               [  2.5,   2.5,   2.5],
-               [  5. ,   5. ,   5. ],
-               [  7.5,   7.5,   7.5],
-               [ 10. ,  10. ,  10. ]])
-        >>> y.reshape((5, 3))
-        array([[ 0. ,  2.5,  5. ],
-               [ 0. ,  2.5,  5. ],
-               [ 0. ,  2.5,  5. ],
-               [ 0. ,  2.5,  5. ],
-               [ 0. ,  2.5,  5. ]])
-        >>> x, y = regular((0, 0, 0, 5), (1, 3))
-        >>> x.reshape((1, 3))
-        array([[ 0.,  0.,  0.]])
-        >>> y.reshape((1, 3))
-        array([[ 0. ,  2.5,  5. ]])
-        >>> x, y, z = regular((0, 10, 0, 5), (5, 3), z=-10)
-        >>> z.reshape((5, 3))
-        array([[-10., -10., -10.],
-               [-10., -10., -10.],
-               [-10., -10., -10.],
-               [-10., -10., -10.],
-               [-10., -10., -10.]])
+    >>> x, y = regular((0, 10, 0, 5), (5, 3))
+    >>> print(x)
+    [  0.    0.    0.    2.5   2.5   2.5   5.    5.    5.    7.5   7.5   7.5
+      10.   10.   10. ]
+    >>> print(x.reshape((5, 3)))
+    [[  0.    0.    0. ]
+     [  2.5   2.5   2.5]
+     [  5.    5.    5. ]
+     [  7.5   7.5   7.5]
+     [ 10.   10.   10. ]]
+    >>> print(y.reshape((5, 3)))
+    [[ 0.   2.5  5. ]
+     [ 0.   2.5  5. ]
+     [ 0.   2.5  5. ]
+     [ 0.   2.5  5. ]
+     [ 0.   2.5  5. ]]
+    >>> x, y = regular((0, 0, 0, 5), (1, 3))
+    >>> print(x.reshape((1, 3)))
+    [[ 0.  0.  0.]]
+    >>> print(y.reshape((1, 3)))
+    [[ 0.   2.5  5. ]]
+    >>> x, y, z = regular((0, 10, 0, 5), (5, 3), z=-10)
+    >>> print(z.reshape((5, 3)))
+    [[-10. -10. -10.]
+     [-10. -10. -10.]
+     [-10. -10. -10.]
+     [-10. -10. -10.]
+     [-10. -10. -10.]]
 
 
     """
     nx, ny = shape
     x1, x2, y1, y2 = area
-    assert x1 <= x2, \
-        "Invalid area dimensions {}, {}. x1 must be < x2.".format(x1, x2)
-    assert y1 <= y2, \
-        "Invalid area dimensions {}, {}. y1 must be < y2.".format(y1, y2)
+    _check_area(area)
     xs = np.linspace(x1, x2, nx)
     ys = np.linspace(y1, y2, ny)
     # Must pass ys, xs in this order because meshgrid uses the first argument
@@ -116,14 +123,28 @@ def scatter(area, n, z=None, seed=None):
 
     Examples::
 
-        >>> x, y = scatter((0, 10, 0, 2), 4, seed=0)
-        >>> x
-        array([ 5.48813504,  7.15189366,  6.02763376,  5.44883183])
-        >>> y
-        array([ 0.8473096 ,  1.29178823,  0.87517442,  1.783546  ])
+    >>> # Passing in a seed value will ensure that scatter will return the same
+    >>> # values given the same input. Use seed=None if you don't want this.
+    >>> x, y = scatter((0, 10, 0, 2), 4, seed=0)
+    >>> # Small function to print the array values with 4 decimal places
+    >>> pprint = lambda arr: print(', '.join('{:.4f}'.format(i) for i in arr))
+    >>> pprint(x)
+    5.4881, 7.1519, 6.0276, 5.4488
+    >>> pprint(y)
+    0.8473, 1.2918, 0.8752, 1.7835
+
+    >>> # scatter can take the z argument as well
+    >>> x2, y2, z2 = scatter((-10, 1, 1245, 3556), 6, z=-150, seed=2)
+    >>> pprint(x2)
+    -5.2041, -9.7148, -3.9537, -5.2115, -5.3760, -6.3663
+    >>> pprint(y2)
+    1717.9430, 2676.1352, 1937.5020, 1861.6378, 2680.4403, 2467.8474
+    >>> pprint(z2)
+    -150.0000, -150.0000, -150.0000, -150.0000, -150.0000, -150.0000
 
     """
     x1, x2, y1, y2 = area
+    _check_area(area)
     np.random.seed(seed)
     arrays = [np.random.uniform(x1, x2, n), np.random.uniform(y1, y2, n)]
     if z is not None:
