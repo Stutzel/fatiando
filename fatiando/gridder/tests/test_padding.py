@@ -1,10 +1,12 @@
+from __future__ import division, absolute_import, print_function
+import numpy.testing as npt
 import numpy as np
-from fatiando import mesher, gridder
-from fatiando.gravmag import prism
 from numpy.testing import assert_array_almost_equal as assert_almost
 from pytest import raises
 import scipy.optimize
 from numpy.random import RandomState
+
+from ... import gridder
 
 
 def test_fails_if_bad_pad_operation():
