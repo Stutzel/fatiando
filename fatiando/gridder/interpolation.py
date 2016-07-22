@@ -1,13 +1,84 @@
 """
 2D interpolation, griding, and profile extraction.
-
->>> from __future__ import division, absolute_import, print_function
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
 import scipy.interpolate
 
 from .point_generation import regular
+
+
+def _check_algorithm(algorithm):
+    """
+    Check if algorithm is a valid option
+    """
+    assert algorithm in ['cubic', 'linear', 'nearest'], \
+        "Invalid interpolation algorithm: {}".format(algorithm)
+
+
+def extrapolate_nans(x, y, v):
+    """"
+    Extrapolate the NaNs or masked values in a grid INPLACE using nearest
+    value.
+
+    .. warning:: Replaces the NaN or masked values of the original array!
+
+    Parameters:
+
+    * x, y : 1D arrays
+        Arrays with the x and y coordinates of the data points.
+    * v : 1D array
+        Array with the scalar value assigned to the data points.
+
+    Returns:
+
+    * v : 1D array
+        The array with NaNs or masked values extrapolated.
+
+    """
+    if np.ma.is_masked(v):
+        nans = v.mask
+    else:
+        nans = np.isnan(v)
+    notnans = np.logical_not(nans)
+    v[nans] = scipy.interpolate.griddata((x[notnans], y[notnans]),
+                                         v[notnans],
+                                         (x[nans], y[nans]),
+                                         method='nearest').ravel()
+    return v
+
+
+def interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=False):
+    """
+    Interpolate data onto the specified points.
+
+    Parameters:
+
+    * x, y : 1D arrays
+        Arrays with the x and y coordinates of the data points.
+    * v : 1D array
+        Array with the scalar value assigned to the data points.
+    * xp, yp : 1D arrays
+        Points where the data values will be interpolated
+    * algorithm : string
+        Interpolation algorithm. Either ``'cubic'``, ``'nearest'``,
+        ``'linear'`` (see scipy.interpolate.griddata)
+    * extrapolate : True or False
+        If True, will extrapolate values outside of the convex hull of the data
+        points.
+
+    Returns:
+
+    * v : 1D array
+        1D array with the interpolated v values.
+
+    """
+    _check_algorithm(algorithm)
+    grid = scipy.interpolate.griddata((x, y), v, (xp, yp),
+                                      method=algorithm).ravel()
+    if extrapolate and algorithm != 'nearest' and np.any(np.isnan(grid)):
+        grid = extrapolate_nans(xp, yp, grid)
+    return grid
 
 
 def interp(x, y, v, shape, area=None, algorithm='cubic', extrapolate=False):
@@ -38,8 +109,7 @@ def interp(x, y, v, shape, area=None, algorithm='cubic', extrapolate=False):
         Three 1D arrays with the interpolated x, y, and v
 
     """
-    if algorithm not in ['cubic', 'linear', 'nearest']:
-        raise ValueError("Invalid interpolation algorithm: " + str(algorithm))
+    _check_algorithm(algorithm)
     nx, ny = shape
     if area is None:
         area = (x.min(), x.max(), y.min(), y.max())
@@ -50,41 +120,7 @@ def interp(x, y, v, shape, area=None, algorithm='cubic', extrapolate=False):
     return [xp, yp, grid]
 
 
-def interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=False):
-    """
-    Interpolate data onto the specified points.
-
-    Parameters:
-
-    * x, y : 1D arrays
-        Arrays with the x and y coordinates of the data points.
-    * v : 1D array
-        Array with the scalar value assigned to the data points.
-    * xp, yp : 1D arrays
-        Points where the data values will be interpolated
-    * algorithm : string
-        Interpolation algorithm. Either ``'cubic'``, ``'nearest'``,
-        ``'linear'`` (see scipy.interpolate.griddata)
-    * extrapolate : True or False
-        If True, will extrapolate values outside of the convex hull of the data
-        points.
-
-    Returns:
-
-    * v : 1D array
-        1D array with the interpolated v values.
-
-    """
-    if algorithm not in ['cubic', 'linear', 'nearest']:
-        raise ValueError("Invalid interpolation algorithm: " + str(algorithm))
-    grid = scipy.interpolate.griddata((x, y), v, (xp, yp),
-                                      method=algorithm).ravel()
-    if extrapolate and algorithm != 'nearest' and np.any(np.isnan(grid)):
-        grid = extrapolate_nans(xp, yp, grid)
-    return grid
-
-
-def profile(x, y, v, point1, point2, size, extrapolate=False):
+def profile(x, y, v, point1, point2, size):
     """
     Extract a data profile between 2 points.
 
@@ -101,9 +137,6 @@ def profile(x, y, v, point1, point2, size, extrapolate=False):
         will be extracted.
     * size : int
         Number of points along the profile.
-    * extrapolate : True or False
-        If True, will extrapolate values outside of the convex hull of the data
-        points.
 
     Returns:
 
@@ -121,36 +154,5 @@ def profile(x, y, v, point1, point2, size, extrapolate=False):
     angle = np.arctan2(y2 - y1, x2 - x1)
     xp = x1 + distances*np.cos(angle)
     yp = y1 + distances*np.sin(angle)
-    vp = interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=extrapolate)
+    vp = interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=True)
     return xp, yp, distances, vp
-
-
-def extrapolate_nans(x, y, v):
-    """"
-    Extrapolate the NaNs or masked values in a grid INPLACE using nearest
-    value.
-
-    .. warning:: Replaces the NaN or masked values of the original array!
-
-    Parameters:
-
-    * x, y : 1D arrays
-        Arrays with the x and y coordinates of the data points.
-    * v : 1D array
-        Array with the scalar value assigned to the data points.
-
-    Returns:
-
-    * v : 1D array
-        The array with NaNs or masked values extrapolated.
-
-    """
-    if np.ma.is_masked(v):
-        nans = v.mask
-    else:
-        nans = np.isnan(v)
-    notnans = np.logical_not(nans)
-    v[nans] = scipy.interpolate.griddata(
-        (x[notnans], y[notnans]), v[notnans], (x[nans], y[nans]),
-        method='nearest').ravel()
-    return v
