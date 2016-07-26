@@ -112,9 +112,9 @@ def interp(x, y, v, shape, area=None, algorithm='cubic', extrapolate=False):
         area = (x.min(), x.max(), y.min(), y.max())
     x1, x2, y1, y2 = area
     xp, yp = regular(area, shape)
-    grid = interp_at(x, y, v, xp, yp, algorithm=algorithm,
-                     extrapolate=extrapolate)
-    return xp, yp, grid
+    vp = interp_at(x, y, v, xp, yp, algorithm=algorithm,
+                   extrapolate=extrapolate)
+    return xp, yp, vp
 
 
 def profile(x, y, v, point1, point2, size, algorithm='cubic'):

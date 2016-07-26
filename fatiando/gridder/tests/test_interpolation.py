@@ -67,3 +67,30 @@ def test_interp_at_extrapolation():
         data_interp = gridder.interp_at(*args, algorithm=algorithm,
                                         extrapolate=True)
         npt.assert_allclose(data[removed], data_interp, rtol=0.01)
+
+
+def test_interp():
+    "Test interpolating on a regular grid using smooth data"
+    # Generate some smooth data on a scatter of points
+    area = [0, 10, -10, -5]
+    # Use a lot of points to get a good interpolation
+    x, y = gridder.scatter(area, n=50000, seed=0)
+    makedata = lambda x, y: x**3 + y**2
+    data = makedata(x, y)
+    shape = (50, 50)
+    for algorithm in ['linear', 'cubic']:
+        # Test passing in a specified area equal the true area
+        xp, yp, datap = gridder.interp(x, y, data, shape, area=area,
+                                       algorithm=algorithm, extrapolate=True)
+        xpt, ypt = gridder.regular(area, shape)
+        npt.assert_allclose(xp, xpt)
+        npt.assert_allclose(yp, ypt)
+        npt.assert_allclose(datap, makedata(xp, yp), rtol=0.05)
+        # Test letting the function determine the area from the inputs
+        xp, yp, datap = gridder.interp(x, y, data, shape, area=None,
+                                       algorithm=algorithm, extrapolate=True)
+        xpt, ypt = gridder.regular((xp.min(), xp.max(), yp.min(), yp.max()),
+                                   shape)
+        npt.assert_allclose(xp, xpt)
+        npt.assert_allclose(yp, ypt)
+        npt.assert_allclose(datap, makedata(xp, yp), rtol=0.05)
