@@ -94,3 +94,34 @@ def test_interp():
         npt.assert_allclose(xp, xpt)
         npt.assert_allclose(yp, ypt)
         npt.assert_allclose(datap, makedata(xp, yp), rtol=0.05)
+
+
+def test_profile():
+    "Extracting a profile from smooth data works"
+    # Generate some smooth data
+    area = [0, 50, -50, 0]
+    shape = (51, 51)
+    x, y = gridder.regular(area, shape)
+    makedata = lambda x, y: x**3 + y**2
+    data = makedata(x, y)
+    for algorithm in ['linear', 'cubic']:
+        # Test with two points along the x axis
+        p1 = [20, 0]
+        p2 = [20, -50]
+        n = shape[0]
+        xp, yp, dist, datap = gridder.profile(x, y, data, p1, p2, n,
+                                              algorithm=algorithm)
+        npt.assert_allclose(dist, np.linspace(0, area[1] - area[0], n))
+        npt.assert_almost_equal(xp, np.zeros_like(xp) + 20)
+        npt.assert_allclose(yp, np.linspace(area[2], area[3], shape[1])[::-1])
+        npt.assert_allclose(datap, makedata(xp, yp))
+        # Test with two points along the y axis
+        p1 = [0, -25]
+        p2 = [50, -25]
+        n = shape[1]
+        xp, yp, dist, datap = gridder.profile(x, y, data, p1, p2, n,
+                                              algorithm=algorithm)
+        npt.assert_allclose(dist, np.linspace(0, area[3] - area[2], n))
+        npt.assert_almost_equal(yp, np.zeros_like(yp) - 25)
+        npt.assert_allclose(xp, np.linspace(area[0], area[1], shape[0]))
+        npt.assert_allclose(datap, makedata(xp, yp))
