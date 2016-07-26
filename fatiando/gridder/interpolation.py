@@ -8,49 +8,45 @@ import scipy.interpolate
 from .point_generation import regular
 
 
-def _check_algorithm(algorithm):
-    """
-    Check if algorithm is a valid option
-    """
-    assert algorithm in ['cubic', 'linear', 'nearest'], \
-        "Invalid interpolation algorithm: {}".format(algorithm)
-
-
-def extrapolate_nans(x, y, v):
+def fill_nans(x, y, v, xp, yp, vp):
     """"
-    Extrapolate the NaNs or masked values in a grid INPLACE using nearest
-    value.
+    Fill in the NaNs or masked values on interpolated points using nearest
+    neighbors.
 
-    .. warning:: Replaces the NaN or masked values of the original array!
+    .. warning::
+
+        Operation is performed in place. Replaces the NaN or masked values of
+        the original array!
 
     Parameters:
 
     * x, y : 1D arrays
-        Arrays with the x and y coordinates of the data points.
+        Arrays with the x and y coordinates of the original data points (not
+        interpolated).
     * v : 1D array
-        Array with the scalar value assigned to the data points.
-
-    Returns:
-
-    * v : 1D array
-        The array with NaNs or masked values extrapolated.
+        Array with the scalar value assigned to the data points (not
+        interpolated).
+    * xp, yp : 1D arrays
+        Points where the data values were interpolated.
+    * vp : 1D array
+        Interpolated data values (the one that has NaNs or masked values to
+        replace).
 
     """
-    if np.ma.is_masked(v):
-        nans = v.mask
+    if np.ma.is_masked(vp):
+        nans = vp.mask
     else:
-        nans = np.isnan(v)
+        nans = np.isnan(vp)
     notnans = np.logical_not(nans)
-    v[nans] = scipy.interpolate.griddata((x[notnans], y[notnans]),
-                                         v[notnans],
-                                         (x[nans], y[nans]),
-                                         method='nearest').ravel()
-    return v
+    vp[nans] = scipy.interpolate.griddata((x, y), v, (xp[nans], yp[nans]),
+                                          method='nearest').ravel()
 
 
 def interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=False):
     """
-    Interpolate data onto the specified points.
+    Interpolate spacial data onto specified points.
+
+    Wraps ``scipy.interpolate.griddata``.
 
     Parameters:
 
@@ -73,17 +69,20 @@ def interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=False):
         1D array with the interpolated v values.
 
     """
-    _check_algorithm(algorithm)
-    grid = scipy.interpolate.griddata((x, y), v, (xp, yp),
-                                      method=algorithm).ravel()
-    if extrapolate and algorithm != 'nearest' and np.any(np.isnan(grid)):
-        grid = extrapolate_nans(xp, yp, grid)
-    return grid
+    vp = scipy.interpolate.griddata((x, y), v, (xp, yp),
+                                    method=algorithm).ravel()
+    if extrapolate and algorithm != 'nearest' and np.any(np.isnan(vp)):
+        fill_nans(x, y, v, xp, yp, vp)
+    return vp
 
 
 def interp(x, y, v, shape, area=None, algorithm='cubic', extrapolate=False):
     """
-    Interpolate data onto a regular grid.
+    Interpolate spacial data onto a regular grid.
+
+    Utility function that generates a regular grid with
+    :func:`~fatiando.gridder.regular` and calls
+    :func:`~fatiando.gridder.interp_at` on the generated points.
 
     Parameters:
 
@@ -109,20 +108,18 @@ def interp(x, y, v, shape, area=None, algorithm='cubic', extrapolate=False):
         Three 1D arrays with the interpolated x, y, and v
 
     """
-    _check_algorithm(algorithm)
-    nx, ny = shape
     if area is None:
         area = (x.min(), x.max(), y.min(), y.max())
     x1, x2, y1, y2 = area
     xp, yp = regular(area, shape)
     grid = interp_at(x, y, v, xp, yp, algorithm=algorithm,
                      extrapolate=extrapolate)
-    return [xp, yp, grid]
+    return xp, yp, grid
 
 
-def profile(x, y, v, point1, point2, size):
+def profile(x, y, v, point1, point2, size, algorithm='cubic'):
     """
-    Extract a data profile between 2 points.
+    Extract a profile between 2 points from spacial data.
 
     Uses interpolation to calculate the data values at the profile points.
 
@@ -137,14 +134,16 @@ def profile(x, y, v, point1, point2, size):
         will be extracted.
     * size : int
         Number of points along the profile.
+    * algorithm : string
+        Interpolation algorithm. Either ``'cubic'``, ``'nearest'``,
+        ``'linear'`` (see scipy.interpolate.griddata).
 
     Returns:
 
     * [xp, yp, distances, vp] : 1d arrays
         ``xp`` and ``yp`` are the x, y coordinates of the points along the
-        profile.
-        ``distances`` are the distances of the profile points to ``point1``
-        ``vp`` are the data points along the profile.
+        profile. ``distances`` are the distances of the profile points from
+        ``point1``. ``vp`` are the data points along the profile.
 
     """
     x1, y1 = point1
@@ -154,5 +153,5 @@ def profile(x, y, v, point1, point2, size):
     angle = np.arctan2(y2 - y1, x2 - x1)
     xp = x1 + distances*np.cos(angle)
     yp = y1 + distances*np.sin(angle)
-    vp = interp_at(x, y, v, xp, yp, algorithm='cubic', extrapolate=True)
+    vp = interp_at(x, y, v, xp, yp, algorithm=algorithm, extrapolate=True)
     return xp, yp, distances, vp
