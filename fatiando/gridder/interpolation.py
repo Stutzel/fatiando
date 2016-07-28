@@ -37,7 +37,6 @@ def fill_nans(x, y, v, xp, yp, vp):
         nans = vp.mask
     else:
         nans = np.isnan(vp)
-    notnans = np.logical_not(nans)
     vp[nans] = scipy.interpolate.griddata((x, y), v, (xp[nans], yp[nans]),
                                           method='nearest').ravel()
 

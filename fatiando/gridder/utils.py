@@ -2,7 +2,6 @@
 Misc utility functions for grid manipulation.
 """
 from __future__ import division, absolute_import, print_function
-import numpy as np
 
 
 def spacing(area, shape):

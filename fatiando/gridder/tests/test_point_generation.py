@@ -38,9 +38,9 @@ def test_regular():
 def test_regular_fails():
     "gridder.regular should fail for invalid input"
     # If the area parameter is specified in the wrong order
-    with raises(AssertionError) as err:
+    with raises(AssertionError):
         x, y = gridder.regular((1, -1, 0, 10), (20, 12))
-    with raises(AssertionError) as err:
+    with raises(AssertionError):
         x, y = gridder.regular((0, 10, 1, -1), (20, 12))
 
 
@@ -70,7 +70,7 @@ def test_scatter():
 def test_scatter_fails():
     "gridder.scatter should fail for invalid input"
     # If the area parameter is specified in the wrong order
-    with raises(AssertionError) as err:
+    with raises(AssertionError):
         x, y = gridder.scatter((1, -1, 0, 10), 20, seed=1)
-    with raises(AssertionError) as err:
+    with raises(AssertionError):
         x, y = gridder.scatter((0, 10, 1, -1), 20, seed=2)

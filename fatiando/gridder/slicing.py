@@ -2,7 +2,6 @@
 Functions for segmenting spacial data (windowing, cutting, etc).
 """
 from __future__ import division, absolute_import, print_function
-import numpy as np
 
 
 def inside(x, y, area):

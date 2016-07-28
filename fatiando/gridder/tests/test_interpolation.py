@@ -1,7 +1,6 @@
 from __future__ import division, absolute_import, print_function
 import numpy.testing as npt
 import numpy as np
-from pytest import raises
 
 from ... import gridder
 from ..interpolation import fill_nans
@@ -75,7 +74,10 @@ def test_interp():
     area = [0, 10, -10, -5]
     # Use a lot of points to get a good interpolation
     x, y = gridder.scatter(area, n=50000, seed=0)
-    makedata = lambda x, y: x**3 + y**2
+
+    def makedata(x, y):
+        return x**3 + y**2
+
     data = makedata(x, y)
     shape = (50, 50)
     for algorithm in ['linear', 'cubic']:
@@ -102,7 +104,10 @@ def test_profile():
     area = [0, 50, -50, 0]
     shape = (51, 51)
     x, y = gridder.regular(area, shape)
-    makedata = lambda x, y: x**3 + y**2
+
+    def makedata(x, y):
+        return x**3 + y**2
+
     data = makedata(x, y)
     for algorithm in ['linear', 'cubic']:
         # Test with two points along the x axis
