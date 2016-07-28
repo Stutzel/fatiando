@@ -288,12 +288,6 @@ def _padcvec(x, n, dx):
     return xp
 
 
-def _unpadcvec(x, n):
-    # Takes a vector, x, and a tuple, n, and removes n[0] elements from the
-    # left and n[1] to the right
-    return x[n[0]: len(x) - n[1]]
-
-
 def _costaper(a, lp, rp):
     # This takes an array and applies a cosine taper to each end.
     # The array has already been deep copied above.  This is by reference only.
