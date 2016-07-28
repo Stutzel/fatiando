@@ -50,7 +50,7 @@ def regular(area, shape, z=None):
         If *z* given. Numpy arrays with the x, y, and z coordinates of the grid
         points
 
-    Examples::
+    Examples:
 
     >>> x, y = regular((0, 10, 0, 5), (5, 3))
     >>> print(x)
@@ -121,7 +121,7 @@ def scatter(area, n, z=None, seed=None):
     * ``[x, y, z]``
         If *z* given. Arrays with the x, y, and z coordinates of the points
 
-    Examples::
+    Examples:
 
     >>> # Passing in a seed value will ensure that scatter will return the same
     >>> # values given the same input. Use seed=None if you don't want this.

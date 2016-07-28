@@ -10,22 +10,20 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
     Return a padded array of arbitrary dimension.
 
     The function takes an array of arbitrary dimension and pads it either to
-    the dimensions given by the tuple npd, or to the next power of 2 if npd is
-    not given.
+    the dimensions given by the tuple *npd*, or to the next power of 2 if *npd*
+    is not given.
 
-    An odd reflection with a cosine taper is the author's preferred method of
-    padding for Fourier operations.  The odd reflection optimally preserves
-    the frequency content while adding minimal sharp inflections.  The cosine
-    taper is a smooth function which also adds few sharp inflection points.
+    An odd reflection with a cosine taper (``padtype='OddReflectionTaper'``) is
+    the preferred method of padding for Fourier Transform operations. The odd
+    reflection optimally preserves the frequency content while adding minimal
+    sharp inflections.
 
-    .. note:: Requires gridded data of the same dimension as desired
+    .. note::
+
+        Requires gridded data of the same dimension as the desired output
         (i.e. no flattened arrays; use reshape).
 
     .. note:: This function returns a deep copy of the original array.
-
-    .. warning:: This function returns the coordinate vectors as a list of
-        arrays.  This means that even for a 1D input array, the returned
-        vector will be in a list of one element.
 
     Parameters:
 
@@ -35,25 +33,18 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
         Desired shape of new padded array.  If not provided, the nearest
         power of 2 will be used.
     * padtype : string (optional)
-        String describing with what to pad the new values. Options:
+        What method will be used to pad the new values. Can be lower or upper
+        case. Options:
 
-        [ oddreflectiontaper | oddreflection | reflection | value | lintaper
-        | edge | mean ]
-
-            oddreflectiontaper - Generates odd reflection then tapers to the
-            mean using a cosine function (Default)
-
-            oddreflection - Pads with the odd reflection, with no taper
-
-            reflection - Pads with simple reflection
-
-            lintaper - Linearly tapers to the mean
-
-            value - Numeric value. Input a float or integer directly.
-
-            edge - Uses the edge value as a constant pad
-
-            mean - Uses the mean of the vector along each axis
+        * *oddreflectiontaper*: Generates odd reflection then tapers to the
+          mean using a cosine function (Default)
+        * *oddreflection*: Pads with the odd reflection, with no taper
+        * *reflection*: Pads with simple reflection
+        * *lintaper*: Linearly tapers to the mean
+        * *value*: Numeric value (e.g., ``'10.4'``). Input a float or integer
+          directly.
+        * *edge*: Uses the edge value as a constant pad
+        * *mean*: Uses the mean of the vector along each axis
 
     Returns:
 
@@ -65,21 +56,21 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
 
     Examples:
 
-        >>> import numpy as np
-        >>> z = np.array([3, 4, 4, 5, 6])
-        >>> zpad, nps = pad_array(z)
-        >>> print(zpad)
-        [ 4.4  3.2  3.   4.   4.   5.   6.   4.4]
-        >>> print(nps)
-        [(2, 1)]
+    >>> import numpy as np
+    >>> z = np.array([3, 4, 4, 5, 6])
+    >>> zpad, nps = pad_array(z)
+    >>> print(zpad)
+    [ 4.4  3.2  3.   4.   4.   5.   6.   4.4]
+    >>> print(nps)
+    [(2, 1)]
 
-        >>> shape = (5, 6)
-        >>> z = np.ones(shape)
-        >>> zpad, nps = pad_array(z, padtype='5')
-        >>> print(zpad.shape)
-        (8, 8)
-        >>> print(nps)
-        [(2, 1), (1, 1)]
+    >>> shape = (5, 6)
+    >>> z = np.ones(shape)
+    >>> zpad, nps = pad_array(z, padtype='5')
+    >>> print(zpad.shape)
+    (8, 8)
+    >>> print(nps)
+    [(2, 1), (1, 1)]
 
     """
     # Test to make sure padtype is valid
@@ -169,15 +160,16 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
 
 def unpad_array(a, nps):
     """
-    Unpads an array using the outputs from pad_array.
+    Remove padding from an array.
 
-    This function takes a padded array and removes the padding from both.
-    Effectively, this is a complement to gridder.cut for when you already
-    know the number of elements to remove.
+    This function takes a padded array and removes the padding from both sides.
+    Designed to use the output of :func:`~fatiando.gridder.pad_array`.
 
-    .. note:: Unlike :func:`~fatiando.gridder.pad_array`, this returns a slice
-        of the input array.  Therefore, any changes to the padded array will be
-        reflected in the unpadded array.
+    .. note::
+
+        Unlike :func:`~fatiando.gridder.pad_array`, this function **returns a
+        slice** of the input array. Therefore, any changes to the padded array
+        will be reflected in the unpadded array!
 
     Parameters:
 
@@ -185,7 +177,7 @@ def unpad_array(a, nps):
         Array to be un-padded.  Can be of arbitrary dimension.
     * nps : list
         List of tuples giving the min and max indices for the cutoff.
-        Identical to nps returned by pad_array
+        Use the value returned by :func:`~fatiando.gridder.pad_array`.
 
     Returns:
 
@@ -194,14 +186,14 @@ def unpad_array(a, nps):
 
     Examples:
 
-        >>> import numpy as np
-        >>> z = np.array([3, 4, 4, 5, 6])
-        >>> zpad, nps = pad_array(z)
-        >>> print(zpad)
-        [ 4.4  3.2  3.   4.   4.   5.   6.   4.4]
-        >>> zunpad = unpad_array(zpad, nps)
-        >>> print(zunpad)
-        [ 3.  4.  4.  5.  6.]
+    >>> import numpy as np
+    >>> z = np.array([3, 4, 4, 5, 6])
+    >>> zpad, nps = pad_array(z)
+    >>> print(zpad)
+    [ 4.4  3.2  3.   4.   4.   5.   6.   4.4]
+    >>> zunpad = unpad_array(zpad, nps)
+    >>> print(zunpad)
+    [ 3.  4.  4.  5.  6.]
 
     """
     o = []
@@ -214,15 +206,18 @@ def unpad_array(a, nps):
 
 def pad_coords(xy, shape, nps):
     """
-    Pads coordinate vectors.
+    Apply padding to coordinate vectors.
 
     Designed to be used in concert with :func:`~fatiando.gridder.pad_array`,
     this function takes a list of coordinate vectors and pads them using the
-    same discretization.
+    same number of elements as the padding of the data array.
 
-    .. note:: This function returns a list of arrays in the same format
-        as, for example, :func:`~fatiando.gridder.regular`.  It is a list of
-        flattened meshgrids for each vector in the same order as was input.
+    .. note::
+
+        This function returns a list of arrays in the same format as, for
+        example, :func:`~fatiando.gridder.regular`. It is a list of flattened
+        ``np.meshgrid`` for each vector in the same order as was input through
+        argument *xy*.
 
     Parameters:
 
@@ -232,7 +227,7 @@ def pad_coords(xy, shape, nps):
         Size of original array
     * nps : list
         List of tuples containing the number of elements padded onto each
-            dimension (uses output from :func:`~fatiando.gridder.pad_array`).
+        dimension (use the output from :func:`~fatiando.gridder.pad_array`).
 
     Returns:
 
@@ -241,22 +236,22 @@ def pad_coords(xy, shape, nps):
 
     Examples:
 
-        >>> import numpy as np
-        >>> from fatiando.gridder import regular
-        >>> shape = (5, 6)
-        >>> x, y, z = regular((-10, 10, -20, 0), shape, z=-25)
-        >>> gz = np.zeros(shape)
-        >>> gzpad, nps = pad_array(gz)
-        >>> print(x.reshape(shape)[:, 0])
-        [-10.  -5.   0.   5.  10.]
-        >>> print(y.reshape(shape)[0, :])
-        [-20. -16. -12.  -8.  -4.   0.]
-        >>> xy = [x, y]
-        >>> N = pad_coords(xy, shape, nps)
-        >>> print(N[0].reshape(gzpad.shape)[:, 0])
-        [-20. -15. -10.  -5.   0.   5.  10.  15.]
-        >>> print(N[1].reshape(gzpad.shape)[0, :])
-        [-24. -20. -16. -12.  -8.  -4.   0.   4.]
+    >>> import numpy as np
+    >>> from fatiando.gridder import regular
+    >>> shape = (5, 6)
+    >>> x, y, z = regular((-10, 10, -20, 0), shape, z=-25)
+    >>> gz = np.zeros(shape)
+    >>> gzpad, nps = pad_array(gz)
+    >>> print(x.reshape(shape)[:, 0])
+    [-10.  -5.   0.   5.  10.]
+    >>> print(y.reshape(shape)[0, :])
+    [-20. -16. -12.  -8.  -4.   0.]
+    >>> xy = [x, y]
+    >>> N = pad_coords(xy, shape, nps)
+    >>> print(N[0].reshape(gzpad.shape)[:, 0])
+    [-20. -15. -10.  -5.   0.   5.  10.  15.]
+    >>> print(N[1].reshape(gzpad.shape)[0, :])
+    [-24. -20. -16. -12.  -8.  -4.   0.   4.]
 
     """
     coords = []

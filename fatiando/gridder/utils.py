@@ -20,7 +20,7 @@ def spacing(area, shape):
     * ``[dx, dy]``
         Spacing the y and x directions
 
-    Examples::
+    Examples:
 
     >>> print(spacing((0, 10, 0, 20), (11, 11)))
     [1.0, 2.0]
