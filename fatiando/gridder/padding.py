@@ -112,7 +112,7 @@ def pad_array(a, npd=None, padtype='OddReflectionTaper'):
                 if len(npd) != 1:
                     raise ValueError(et)
                 else:
-                    npt.append(npd)
+                    npt.extend(npd)
         else:
             if _is_integer(npd):
                 raise ValueError(et)

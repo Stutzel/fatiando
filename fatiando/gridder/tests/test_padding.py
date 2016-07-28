@@ -38,8 +38,17 @@ def test_pad_and_unpad_equal_2d():
 def test_pad_and_unpad_equal_1d():
     'gridder.pad_array and subsequent .unpad_array gives original array: 1D'
     prng = RandomState(12345)
-    x = prng.rand(21)
+    x = np.array([3, 4, 4, 5, 6])
+    xpad_true = np.array([4.4, 3.2, 3, 4, 4, 5, 6, 4.4])
     xpad, nps = gridder.pad_array(x)
+    assert_almost(xpad_true, xpad)
+    assert nps == [(2, 1)]
+    xunpad = gridder.unpad_array(xpad, nps)
+    assert_almost(xunpad, x)
+    # Using a custom number of padding elements
+    xpad, nps = gridder.pad_array(x, npd=(10,))
+    assert nps == [(3, 2)]
+    assert_almost(xpad[3:-2], x)
     xunpad = gridder.unpad_array(xpad, nps)
     assert_almost(xunpad, x)
 
